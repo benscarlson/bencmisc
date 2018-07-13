@@ -1,4 +1,5 @@
 #this should be an general function to run a report and copy the pdf to a specified directory
+#' @export
 reportRunCopy <- function(reportPF,reportOutPF,params=NULL) {
   require(glue)
   require(knitr)

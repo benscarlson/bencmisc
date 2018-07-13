@@ -2,9 +2,9 @@
 #   p <- confplot(fit) + ggtitle('Confidence Intervals', subtitle ='Mangus May 2013')
 #   print(p)
 #   ggsave(filename='figures/fit4.png',plot=p)
-
+#' @import ggplot2
+#' @export
 confplot <- function(fit,intercept=FALSE) {
-  require(ggplot2)
 
   #confint fails for some reason, but confint.default works
   #confint uses the 'profile-likelihood' limits

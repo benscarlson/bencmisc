@@ -1,16 +1,16 @@
 #quick and dirty centroid function.
 #does not take spherical coords into account.
 centroidXYdf <- function(df) {
-  require(dplyr)
 
   if('lon' %in% names(df) & 'lat' %in% colnames(df)) {
-    df <- rename(df,x=lon,y=lat)
+    df <- dplyr::rename(df,x=lon,y=lat)
   }
   x <- (min(df$x) + max(df$x))/2
   y <- (min(df$y) + max(df$y))/2
   return(c(x=x,y=y))
 }
 
+#' @import ggmap
 getMapRetry <- function(centroid, zoom, maptype) {
   mp <- NULL
   attempt <- 0
@@ -36,10 +36,11 @@ getMapRetry <- function(centroid, zoom, maptype) {
 # Assumes lon, lat, timestamp columns
 #TODO: catch and retry error:
 ## Error in download.file(url, destfile = tmp, quiet = !messaging, mode = "wb"):  cannot open URL ...
+#' @import ggmap
+#' @import ggplot2
+#' @import lubridate
+#' @export
 ggmapTrack <- function(gdat,centroid=NULL,zoom=NULL,indivName=NULL, maptype='satellite', drawPath=TRUE) {
-  require(ggmap)
-  #require(ggsn)
-  require(lubridate)
 
   if(is.null(centroid)) {
     centroid=centroidXYdf(gdat)
@@ -49,23 +50,16 @@ ggmapTrack <- function(gdat,centroid=NULL,zoom=NULL,indivName=NULL, maptype='sat
     zoom <- calc_zoom(make_bbox(lon,lat,data=gdat,f=0.2))-1
   }
 
-  # gdat$behav <- factor(
-  #   as.integer(gdat$behav),
-  #   levels=c(2,3,4,5,6),
-  #   labels=c('Flight (active)','Flight (passive)','Walking/Pecking','Standing/Preening','Sitting'))
-
   mp <- getMapRetry(centroid,zoom,maptype)
 
-  # mp <- get_map(location = c(lon = centroid['x'], lat = centroid['y']), zoom = zoom,
-  #               maptype = maptype, scale = 2, messaging=FALSE)
-
   title <- sprintf('Animal name: %s',ifelse(is.null(indivName),'<Unspecified>',indivName))
+  print(title)
   st <- sprintf('%s to %s, zoom=%s, n=%s',
     lubridate::date(min(gdat$timestamp)),
     lubridate::date(max(gdat$timestamp)),
     zoom,
     formatC(nrow(gdat),big.mark=',',format='f',digits=0))
-
+  print(st)
   p <- ggmap(mp) +
     labs(title=title, subtitle=st)
 
@@ -79,21 +73,30 @@ ggmapTrack <- function(gdat,centroid=NULL,zoom=NULL,indivName=NULL, maptype='sat
   #Color by timestamp
   rng <- range(as.numeric(gdat$timestamp))
 
-  if(diff(rng) != 0) { #can't color if there is no difference between timestamps
-    #this is how ggplot internally figures out breaks
-    #https://stackoverflow.com/questions/38486102/how-does-ggplot-calculate-its-default-breaks
-    breaks <-labeling::extended(rng[1], rng[2], m = 5) #note won't display the first and last items
-    labels <- as.Date(as.POSIXct(breaks,origin='1970-01-01',tz='UTC'))
+  #can't figure out why, but this code is now giving error. worked earlier!
+  # Error in as.POSIXct.numeric(value) : 'origin' must be supplied
+  # Might have something to do with 'fill' above
 
-    p <- p + scale_fill_gradient('Timestamp',low = "grey", high = "blue", breaks=breaks, labels=labels)
-  } else {
+  # if(diff(rng) != 0) { #can't color if there is no difference between timestamps
+  #   #this is how ggplot internally figures out breaks
+  #   #https://stackoverflow.com/questions/38486102/how-does-ggplot-calculate-its-default-breaks
+  #   breaks <-labeling::extended(rng[1], rng[2], m = 5) #note won't display the first and last items
+  #
+  #   labels <- as.Date(as.POSIXct(breaks,origin='1970-01-01',tz='UTC'))
+  #
+  #   p <- p + scale_fill_gradient('Timestamp',low = "grey", high = "blue", breaks=breaks, labels=labels)
+  #
+  #   #taking out breaks and labels does not fix the problem
+  #   #p <- p + scale_fill_gradient('Timestamp',low = "grey", high = "blue")
+  # } else {
     p <- p + guides(fill=FALSE)
-  }
+  # }
 
   #issue with adding scalebar is location is based on data extent, not on map
   # extent. might be able to fix, see: http://oswaldosantos.github.io/ggsn/
   #ggsn::scalebar(data=rename(gdat,long=lon,lat=lat),
   #  dist = 10, dd2km = TRUE, model = 'WGS84',location='bottomleft', st.size=3) +
 
+  print('returning p')
   return(p)
 }
