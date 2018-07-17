@@ -9,7 +9,7 @@ reportRunCopy <- function(reportPF,reportOutPF,params=NULL) {
   reportName <- sub('\\.rnw$','', basename(reportPF), ignore.case=TRUE)
 
   #parameters used internally in the report
-  .params <- params
+  .p <- params
 
   #note: this will set the wd to the directory of the report
   message('Starting report generation...')

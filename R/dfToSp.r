@@ -5,7 +5,7 @@
 # @import sp #shouldn't need this import anymore
 #' @export
 #'
-dfToSp <- function(dat,proj="+proj=longlat +datum=WGS84",toProj=NULL) {
+dfToSp <- function(dat,proj="+proj=longlat +datum=WGS84 +no_defs",toProj=NULL) {
   pts <- dat
   sp::coordinates(pts) <- ~ lon + lat
   message('Assuming dataframe lon/lat are WGS84 coordinates.')

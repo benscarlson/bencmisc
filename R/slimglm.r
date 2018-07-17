@@ -1,6 +1,6 @@
 #mostly based on this post:
 # http://www.win-vector.com/blog/2014/05/trimming-the-fat-from-glm-models-in-r/
-
+#' @export
 slimGlm <- function(fit) {
 
   # just in case we forgot to set

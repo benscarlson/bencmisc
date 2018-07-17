@@ -17,8 +17,8 @@ confplot <- function(fit,intercept=FALSE) {
   est <- coef(fit)
 
   if(!intercept) {
-    ci1 <- ci1[-1, ]
-    est <- est[-1]
+    ci1 <- ci1[-1, ,drop=FALSE] #if only two rows, need to do drop=FALSE or returns a vector
+    est <- est[-1] #already a vector
   }
 
   dat <- data.frame(var=rownames(ci1),
