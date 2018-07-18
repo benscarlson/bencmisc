@@ -16,5 +16,6 @@ Imports:
   glue,
   knitr,
   lubridate,
+  move,
   sp
 RoxygenNote: 6.0.1

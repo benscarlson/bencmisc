@@ -1,5 +1,6 @@
 #quick and dirty centroid function.
 #does not take spherical coords into account.
+#' @export
 centroidXYdf <- function(df) {
 
   if('lon' %in% names(df) & 'lat' %in% colnames(df)) {
@@ -10,7 +11,7 @@ centroidXYdf <- function(df) {
   return(c(x=x,y=y))
 }
 
-#' @import ggmap
+#' @export
 getMapRetry <- function(centroid, zoom, maptype) {
   mp <- NULL
   attempt <- 0
@@ -18,7 +19,7 @@ getMapRetry <- function(centroid, zoom, maptype) {
   while( is.null(mp) && attempt <= 3 ) {
     attempt <- attempt + 1
     try(
-      mp <- get_map(location = c(lon = centroid['x'], lat = centroid['y']),
+      mp <- ggmap::get_map(location = c(lon = centroid['x'], lat = centroid['y']),
                     zoom = zoom, maptype = maptype, scale = 2, messaging=FALSE)
     )
   }

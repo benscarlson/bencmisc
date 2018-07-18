@@ -6,30 +6,29 @@
 # requires lon, lat, timestamp, short_name fields
 # assumes that points are in WGS84 format
 #
+#' @export
 dfToMove <- function(dat, animalName=NULL) {
-  require(move)
-  require(dplyr)
-  
+
   if(is.null(animalName)) {
     stop('Supply animal name')
   }
-  
+
   message('Assuming proj="+proj=longlat +ellps=WGS84"')
   #TODO: make sure data is in WGS84 format
-  
-  dat <- dat %>% arrange(timestamp) #move function requires this
+
+  dat <- dat %>% dplyr::arrange(timestamp) #move function requires this
   df <- data.frame(dat)
-  
+
   # if(is.null(animalName)) {
   #   animalName = df$short_name #TODO: should be more general!
   #   #animalName = df$niche_group
   # }
-  
-  mv <- move(x=df$lon,y=df$lat,time=df$timestamp,
-             proj=CRS("+proj=longlat +ellps=WGS84"),
+
+  mv <- move::move(x=df$lon,y=df$lat,time=df$timestamp,
+             proj=sp::CRS("+proj=longlat +ellps=WGS84"),
              animal=rep(animalName,nrow(df)),
              data=df %>% dplyr::select(-c(lon,lat,timestamp)))
-  
+
   return(mv)
 }
 #----
@@ -40,13 +39,13 @@ dfToMoveStack <- function(dat) {
   require(dplyr)
   require(purrr)
   require(tidyr)
-  
-  dat1 <- dat %>% 
+
+  dat1 <- dat %>%
     mutate(short_name2=short_name) %>% #hack to get short_name into the function call, since group_by removes it
-    group_by(short_name2) %>% 
-    nest() %>% 
+    group_by(short_name2) %>%
+    nest() %>%
     mutate(moveObj = data %>% map(dfToMove))
-  
+
   return(moveStack(dat1$moveObj))
 }
 #----
