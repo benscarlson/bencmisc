@@ -54,13 +54,13 @@ ggmapTrack <- function(gdat,centroid=NULL,zoom=NULL,indivName=NULL, maptype='sat
   mp <- getMapRetry(centroid,zoom,maptype)
 
   title <- sprintf('Animal name: %s',ifelse(is.null(indivName),'<Unspecified>',indivName))
-  print(title)
+
   st <- sprintf('%s to %s, zoom=%s, n=%s',
     lubridate::date(min(gdat$timestamp)),
     lubridate::date(max(gdat$timestamp)),
     zoom,
     formatC(nrow(gdat),big.mark=',',format='f',digits=0))
-  print(st)
+
   p <- ggmap(mp) +
     labs(title=title, subtitle=st)
 
@@ -98,6 +98,5 @@ ggmapTrack <- function(gdat,centroid=NULL,zoom=NULL,indivName=NULL, maptype='sat
   #ggsn::scalebar(data=rename(gdat,long=lon,lat=lat),
   #  dist = 10, dd2km = TRUE, model = 'WGS84',location='bottomleft', st.size=3) +
 
-  print('returning p')
   return(p)
 }
