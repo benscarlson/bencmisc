@@ -1,8 +1,6 @@
 #accepts a df (for now with lon/lat columns)
 #creates a SP object
 #transforms coordinate system if requested.
-# @import glue #shouldn't need this import anymore
-# @import sp #shouldn't need this import anymore
 #' @export
 #'
 dfToSp <- function(dat,proj="+proj=longlat +datum=WGS84 +no_defs",toProj=NULL) {
