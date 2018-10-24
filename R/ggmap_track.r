@@ -35,13 +35,25 @@ getMapRetry <- function(centroid, zoom, maptype) {
 
 #----------
 # Assumes lon, lat, timestamp columns
-#TODO: catch and retry error:
-## Error in download.file(url, destfile = tmp, quiet = !messaging, mode = "wb"):  cannot open URL ...
+#TODO: should be able to remove these imports
 #' @import ggmap
 #' @import ggplot2
 #' @import lubridate
 #' @export
 ggmapTrack <- function(gdat,centroid=NULL,zoom=NULL,indivName=NULL, maptype='satellite', drawPath=TRUE) {
+
+  if(FALSE) {
+    centroid <- c(x=12,y=52); zoom <- 10; maptype <- 'satellite'
+  }
+
+  if(!has_goog_key()) {
+    key <- keyring::key_get('api',keyring='google_maps')
+    if(key=='') {
+      stop('Google api key was not found in google_maps keyring. Set it with key_set_with_value()')
+    }
+
+    register_google(key=key) #need to set this with key_set_with_value('gmaps_api',password=<key>)
+  }
 
   if(is.null(centroid)) {
     centroid=centroidXYdf(gdat)
@@ -69,7 +81,7 @@ ggmapTrack <- function(gdat,centroid=NULL,zoom=NULL,indivName=NULL, maptype='sat
   }
 
   #make sure to add geom_point on top of geom_path.
-  p <- p + geom_point(data = gdat, size = 3, shape = 21,
+  p <- p + geom_point(data = gdat, size = 2, shape = 21,
                           aes(x = lon, y = lat, fill=timestamp))
   #Color by timestamp
   rng <- range(as.numeric(gdat$timestamp))
