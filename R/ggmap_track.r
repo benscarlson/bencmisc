@@ -1,5 +1,5 @@
-#quick and dirty centroid function.
-#does not take spherical coords into account.
+#' quick and dirty centroid function.
+#' does not take spherical coords into account.
 #' @export
 centroidXYdf <- function(df) {
 
@@ -11,10 +11,43 @@ centroidXYdf <- function(df) {
   return(c(x=x,y=y))
 }
 
+#' Gets a google map, retries if fails.
+#'
+#' @param centroid \code{numeric vector} A named vector with two elements (x and y)
+#' @param zoom \code{integer}
+#' @param maptype \code{string} Passed to ggmap maptype argument.
+#' @return a ggmap object (a classed raster object with a bounding box attribute)
+#' @examples
+#' getMapRetry(c(lon=12,lat=45),11,'Satellite')
 #' @export
+#'
 getMapRetry <- function(centroid, zoom, maptype) {
+  #TODO: accept dataframe, use if centiod is not supplied
+  # default or allow zoom to be null, then calculate zoom
+  # default maptype
+
   mp <- NULL
   attempt <- 0
+
+  if(!ggmap::has_goog_key()) {
+    #key <- keyring::key_get('google_maps',keyring='api_keys')
+    key <- stringr::str_replace_all(readr::read_file('~/.secrets/api_key_google_maps.txt'), "[\r\n]" , "")
+    if(key=='') {
+      #stop('Google api key was not found in google_maps keyring. Set it with key_set_with_value()')
+      stop('Google maps api key was not found')
+    }
+
+    message('registering api key...')
+    ggmap::register_google(key=key) #need to set this with key_set_with_value('gmaps_api',password=<key>)
+
+    #bug in ggmap, need to specifically set signature to NA
+    #see https://github.com/dkahle/ggmap/issues/205
+    option <- getOption('ggmap')
+    option$google$signature <- NA
+    options(ggmap = option)
+
+  }
+
   message('Getting map...')
   while( is.null(mp) && attempt <= 3 ) {
     attempt <- attempt + 1
@@ -36,9 +69,7 @@ getMapRetry <- function(centroid, zoom, maptype) {
 #----------
 # Assumes lon, lat, timestamp columns
 #TODO: should be able to remove these imports
-#' @import ggmap
 #' @import ggplot2
-#' @import lubridate
 #' @export
 ggmapTrack <- function(gdat,centroid=NULL,zoom=NULL,indivName=NULL, maptype='satellite', drawPath=TRUE) {
 
@@ -46,21 +77,12 @@ ggmapTrack <- function(gdat,centroid=NULL,zoom=NULL,indivName=NULL, maptype='sat
     centroid <- c(x=12,y=52); zoom <- 10; maptype <- 'satellite'
   }
 
-  if(!has_goog_key()) {
-    key <- keyring::key_get('api',keyring='google_maps')
-    if(key=='') {
-      stop('Google api key was not found in google_maps keyring. Set it with key_set_with_value()')
-    }
-
-    register_google(key=key) #need to set this with key_set_with_value('gmaps_api',password=<key>)
-  }
-
   if(is.null(centroid)) {
     centroid=centroidXYdf(gdat)
   }
 
   if(is.null(zoom)) {
-    zoom <- calc_zoom(make_bbox(lon,lat,data=gdat,f=0.2))-1
+    zoom <- ggmap::calc_zoom(make_bbox(lon,lat,data=gdat,f=0.2))-1
   }
 
   mp <- getMapRetry(centroid,zoom,maptype)
@@ -73,7 +95,7 @@ ggmapTrack <- function(gdat,centroid=NULL,zoom=NULL,indivName=NULL, maptype='sat
     zoom,
     formatC(nrow(gdat),big.mark=',',format='f',digits=0))
 
-  p <- ggmap(mp) +
+  p <- ggmap::ggmap(mp) +
     labs(title=title, subtitle=st)
 
   if(drawPath) {

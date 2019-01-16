@@ -18,5 +18,8 @@ Imports:
   keyring,
   lubridate,
   move,
+  readr,
+  stringr,
   sp
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
+Suggests: testthat

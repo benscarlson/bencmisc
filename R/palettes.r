@@ -1,5 +1,6 @@
 #Color palettes from Cory
 
+#' Color palette from Cory
 #' @describeIn cm.cols1 basic color scheme
 #' @export
 cm.cols1 <- function(x,bias=1) {
