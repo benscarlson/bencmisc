@@ -1,4 +1,17 @@
-#this should be an general function to run a report and copy the pdf to a specified directory
+#' Escapes latex special characters.
+#' Add additional to this function as needed.
+#'
+#' @export
+#'
+escapeForLatex <- function(str) {
+  result <- str
+  result <- gsub("&", "\\&", result, fixed = TRUE)
+  result <- gsub("_", "\\_", result, fixed = TRUE)
+
+  return(result)
+}
+
+#this is a general function to run a report and copy the pdf to a specified directory
 #' @export
 reportRunCopy <- function(reportPF,reportOutPF,params=NULL) {
   require(glue)

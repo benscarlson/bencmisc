@@ -2,23 +2,10 @@
 % Please edit documentation in R/ggmap_track.r
 \name{getMapRetry}
 \alias{getMapRetry}
-\title{Gets a google map, retries if fails.}
+\title{Generic method for getMapRetry}
 \usage{
-getMapRetry(centroid, zoom, maptype)
-}
-\arguments{
-\item{centroid}{\code{numeric vector} A named vector with two elements (x and y)}
-
-\item{zoom}{\code{integer}}
-
-\item{maptype}{\code{string} Passed to ggmap maptype argument.}
-}
-\value{
-a ggmap object (a classed raster object with a bounding box attribute)
+getMapRetry(x, ...)
 }
 \description{
-Gets a google map, retries if fails.
-}
-\examples{
-getMapRetry(c(lon=12,lat=45),11,'Satellite')
+Generic method for getMapRetry
 }

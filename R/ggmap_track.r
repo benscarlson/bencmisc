@@ -11,6 +11,16 @@ centroidXYdf <- function(df) {
   return(c(x=x,y=y))
 }
 
+#' Generic method for getMapRetry
+#'
+#' @export
+#'
+getMapRetry <- function (x, ...) {
+  UseMethod("getMapRetry", x)
+  #TODO: add generic method to accept data.frame/tibble.
+  #TODO: incorporate code somewhere to default zoom based on dataset passed in.
+}
+
 #' Gets a google map, retries if fails.
 #'
 #' @param centroid \code{numeric vector} A named vector with two elements (x and y)
@@ -21,15 +31,41 @@ centroidXYdf <- function(df) {
 #' getMapRetry(c(lon=12,lat=45),11,'Satellite')
 #' @export
 #'
-getMapRetry <- function(centroid, zoom, maptype) {
-  #TODO: accept dataframe, use if centiod is not supplied
+getMapRetry.sf <- function(x,...) {
+
+  #get centroid (as named vector) from sf object. Actually pretty complex!
+  sfc_centroid <- x %>%
+    st_bbox %>% #bbox object
+    st_as_sfc %>% #sfc_POLYGON (a geometry set ("column") of sfc_POLYGONs)
+    st_centroid #sfc_POINT (a geometry set ("column") of sfc_POINTs)
+
+  #sf doesn't calculate centroid correctly if using geographic coords
+  # so, convert to geographic after getting centroid
+  if(st_crs(sfc_centroid)$epsg != 4326) x <- st_transform(sfc_centroid,4326)
+
+  #st_coordinates returns a matrix of coordinates.
+  #I only have one point so get first row as a vector
+  centroid <- st_coordinates(sfc_centroid)[1,]
+  class(centroid) <- 'centroid'
+
+  return(getMapRetry.centroid(centroid, ...))
+}
+
+getMapRetry.centroid <- function(centroid, zoom, maptype) {
+  #TODO:
   # default or allow zoom to be null, then calculate zoom
   # default maptype
 
   mp <- NULL
   attempt <- 0
 
-  if(!ggmap::has_goog_key()) {
+  #This is set in bootstrap_ggmap(),
+  # somehow, ggmap::.onAttach() is not being called, which initializes a bunch of things.
+  # not sure how to handle this within library
+  # https://github.com/dkahle/ggmap/blob/master/R/attach.R
+  ggmap::set_ggmap_option("display_api_key" = FALSE)
+
+  if(!ggmap::has_google_key()) {
     #key <- keyring::key_get('google_maps',keyring='api_keys')
     key <- stringr::str_replace_all(readr::read_file('~/.secrets/api_key_google_maps.txt'), "[\r\n]" , "")
     if(key=='') {
@@ -40,11 +76,12 @@ getMapRetry <- function(centroid, zoom, maptype) {
     message('registering api key...')
     ggmap::register_google(key=key) #need to set this with key_set_with_value('gmaps_api',password=<key>)
 
+    #This seems to be fixed now, no need to set this option.
     #bug in ggmap, need to specifically set signature to NA
     #see https://github.com/dkahle/ggmap/issues/205
-    option <- getOption('ggmap')
-    option$google$signature <- NA
-    options(ggmap = option)
+    #option <- getOption('ggmap')
+    #option$google$signature <- NA
+    #options(ggmap = option)
 
   }
 
@@ -52,7 +89,7 @@ getMapRetry <- function(centroid, zoom, maptype) {
   while( is.null(mp) && attempt <= 3 ) {
     attempt <- attempt + 1
     try(
-      mp <- ggmap::get_map(location = c(lon = centroid['x'], lat = centroid['y']),
+      mp <- ggmap::get_map(location = c(lon = centroid['X'], lat = centroid['Y']),
                     zoom = zoom, maptype = maptype, scale = 2, messaging=FALSE)
     )
   }
