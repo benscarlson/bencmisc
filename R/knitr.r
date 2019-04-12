@@ -4,6 +4,7 @@
 #' @export
 #'
 escapeForLatex <- function(str) {
+  #Note, don't need to escape dash symbol '-'
   result <- str
   result <- gsub("&", "\\&", result, fixed = TRUE)
   result <- gsub("_", "\\_", result, fixed = TRUE)

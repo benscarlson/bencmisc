@@ -1,0 +1,3 @@
+#Building
+devtools::document(); devtools::build()
+R CMD INSTALL ~/projects/bencmisc_0.1.0.tar.gz

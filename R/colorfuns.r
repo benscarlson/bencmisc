@@ -1,3 +1,29 @@
+#TODO: this file should have all function related to colors, palettes, colortables, etc.
+# see files geePalette.r, legendToSLD.r, palettes.r
+
+#TODO: for color tables, try to have a single unified csv format that can be translated to and
+# from every other format.
+#
+# Start with fields:
+# value - the numeric value of the class
+# label - the name of the class
+# color_rgb - a three digit tuple of rgb values
+
+#' Creates a color table that can be used by gdaldem
+#' Write the return to disk using:
+#' write.table(ret,'myfile.txt', row.names=FALSE,quote=FALSE,col.names=FALSE)
+#' @export
+gdaldemColorTable <- function(dat) {
+  #dat <- read_csv('/Users/benc/projects/gis-data/dfd_lulc/DFD-LULC_DE2014_subset_legend.csv')
+
+  ret <- dat %>%
+    mutate(rgb=gsub(' ', ',', color_rgb)) %>%
+    mutate(line=as.character(glue('{value}: {rgb}'))) %>%
+    select(line)
+
+  return(ret)
+}
+
 #' Accpets rbg tuple string e.g. '165 239 210' and returns hex string '#A5EFD2'
 #' @param x \code{string} vector of rgb tuples in the form 'r g b'.
 #' @examples

@@ -11,6 +11,14 @@ elapsedMinSec <- function(start,end=proc.time()) {
   secPart <- (mins - minPart)*60
   names(secPart) <- 'seconds'
 
-  return(c(minPart,secPart))
+  el <- c(minPart,secPart)
+  class(el) <- 'elapsedMinSec'
 
+  return(el)
+
+}
+
+#' @export
+format.elapsedMinSec <- function(x,...) {
+  return(glue::glue('Elapsed time is {x[1]} min and {round(x[2])} sec'))
 }

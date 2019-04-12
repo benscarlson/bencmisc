@@ -23,7 +23,7 @@ getMapRetry <- function (x, ...) {
 
 #' Gets a google map, retries if fails.
 #'
-#' @param centroid \code{numeric vector} A named vector with two elements (x and y)
+#' @param x \code{sf object} A named vector with two elements (x and y)
 #' @param zoom \code{integer}
 #' @param maptype \code{string} Passed to ggmap maptype argument.
 #' @return a ggmap object (a classed raster object with a bounding box attribute)
@@ -51,6 +51,16 @@ getMapRetry.sf <- function(x,...) {
   return(getMapRetry.centroid(centroid, ...))
 }
 
+#' Gets a google map, retries if fails.
+#'
+#' @param centroid \code{numeric vector} A named vector with two elements (x and y)
+#' @param zoom \code{integer}
+#' @param maptype \code{string} Passed to ggmap maptype argument.
+#' @return a ggmap object (a classed raster object with a bounding box attribute)
+#' @examples
+#' getMapRetry(c(lon=12,lat=45),11,'Satellite')
+#' @export
+#'
 getMapRetry.centroid <- function(centroid, zoom, maptype) {
   #TODO:
   # default or allow zoom to be null, then calculate zoom
