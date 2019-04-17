@@ -17,18 +17,35 @@ centroidXYdf <- function(df) {
 #'
 getMapRetry <- function (x, ...) {
   UseMethod("getMapRetry", x)
-  #TODO: add generic method to accept data.frame/tibble.
   #TODO: incorporate code somewhere to default zoom based on dataset passed in.
 }
 
 #' Gets a google map, retries if fails.
 #'
-#' @param x \code{sf object} A named vector with two elements (x and y)
+#' @param x \code{data.frame}. Data frame should have lon/lat columns
+#' @return a ggmap object (a classed raster object with a bounding box attribute)
+#' @examples
+#' getMapRetry(mydf,11,'Satellite')
+#' @export
+#'
+getMapRetry.data.frame <- function(x, ...) {
+
+  centroid <- dplyr::select(x,lon,lat) %>%
+    geosphere::centroid()
+  centroid <- centroid[1,]
+  names(centroid) <- c('X','Y')
+  class(centroid) <- 'centroid'
+
+  return(getMapRetry.centroid(centroid, ...))
+}
+#' Gets a google map, retries if fails.
+#'
+#' @param x \code{sf object}
 #' @param zoom \code{integer}
 #' @param maptype \code{string} Passed to ggmap maptype argument.
 #' @return a ggmap object (a classed raster object with a bounding box attribute)
 #' @examples
-#' getMapRetry(c(lon=12,lat=45),11,'Satellite')
+#' getMapRetry(mysf,11,'Satellite')
 #' @export
 #'
 getMapRetry.sf <- function(x,...) {
